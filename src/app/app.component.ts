@@ -17,8 +17,7 @@ export class AppComponent {
 	tokenJWT = '{ "token":""}';
 
 	constructor(private http: HttpClient) {
-		//this.apiURL = 'https://todo-app-cxsib6432-imlymei.vercel.app';
-		this.apiURL = 'http://localhost:3000';
+		this.apiURL = 'https://todo-app-api-five.vercel.app';
 	}
 
 	CREATE_tarefa(_descricaoNovaTarefa: string) {

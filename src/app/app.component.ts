@@ -17,7 +17,8 @@ export class AppComponent {
 	tokenJWT = '{ "token":""}';
 
 	constructor(private http: HttpClient) {
-		this.apiURL = 'https://todo-app-api-five.vercel.app';
+		//this.apiURL = 'https://todo-app-api-five.vercel.app';
+		this.apiURL = 'http://localhost:3000';
 	}
 
 	CREATE_tarefa(_descricaoNovaTarefa: string) {
@@ -58,6 +59,7 @@ export class AppComponent {
 	}
 
 	login(username: string, password: string) {
+		const CORS = new HttpHeaders().set("Access-Control-Allow-Origin", "*")
 		var credenciais = { "nome": username, "senha": password }
 		this.http.post(`${this.apiURL}/api/login`, credenciais).subscribe(resultado => {
 		this.tokenJWT = JSON.stringify(resultado);

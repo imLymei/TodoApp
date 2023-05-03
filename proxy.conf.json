@@ -1,6 +1,6 @@
 {
-    "/delivery/all/*": {
-    "target": "https://todo-app-api-five.vercel.app",
+    "/api": {
+    "target": "*",
     "secure": false,
     "logLevel": "debug",
     "changeOrigin": true

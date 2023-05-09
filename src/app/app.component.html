@@ -1,4 +1,12 @@
 <main>
+	<div *ngIf="isAdmin" class="add-user">
+		<button (click)="READ_USERS()">Ver usuarios</button>
+		<ul>
+			<li *ngFor="let user of arrayDeUsers">
+				<h3>{{user.username}}: {{user.password}}</h3>
+			</li>
+		</ul>
+	</div>
 	<div *ngIf="usuarioLogado" class="all">
 		<h1>Felipe Cardoso - 218411</h1>
 		<h1>Ariane Lacerda - 215641</h1>

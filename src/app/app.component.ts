@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Tarefa } from './tarefa';
+import { User } from './user';
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 
@@ -12,9 +13,11 @@ export class AppComponent {
 	title = 'TODOapp';
 
 	arrayDeTarefas: Tarefa[] = [];
+	arrayDeUsers: User[] = []
 	apiURL : string;
 	usuarioLogado = false;
-	tokenJWT = '{ "token":""}';
+	isAdmin = false;
+	tokenJWT = '{ "token":"", "isAdmin": false}';
 
 	constructor(private http: HttpClient) {
 		//this.apiURL = 'https://todo-app-api-five.vercel.app';
@@ -42,7 +45,7 @@ export class AppComponent {
 	READ_tarefas() {
 		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
 		this.http.get<Tarefa[]>(`${this.apiURL}/api/getAll`, { 'headers': idToken }).subscribe(
-		(resultado) => { this.arrayDeTarefas = resultado; this.usuarioLogado = true },
+		(resultado) => { this.arrayDeTarefas = resultado; this.usuarioLogado = true; if (this.isAdmin) this.READ_USERS },
 		(error) => { this.usuarioLogado = false }
 		)
 	   }
@@ -60,11 +63,22 @@ export class AppComponent {
 
 	login(username: string, password: string) {
 		const CORS = new HttpHeaders().set("Access-Control-Allow-Origin", "*")
-		var credenciais = { "nome": username, "senha": password }
+		var credenciais = { "username": username, "password": password }
 		this.http.post(`${this.apiURL}/api/login`, credenciais).subscribe(resultado => {
 		this.tokenJWT = JSON.stringify(resultado);
 		this.READ_tarefas();
+		if (JSON.parse(this.tokenJWT).isAdmin){
+			this.isAdmin = true;
+		}
 		});
+	}
+
+	READ_USERS(){
+		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
+		this.http.get<User[]>(`${this.apiURL}/api/getAllUsers`, { 'headers': idToken}).subscribe(
+		(resultado) => { this.arrayDeUsers=resultado; this.usuarioLogado = true },
+		(error) => { this.usuarioLogado = false }
+		)
 	}
 	   
 	   

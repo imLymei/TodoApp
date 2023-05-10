@@ -17,6 +17,8 @@ export class AppComponent {
 	apiURL : string;
 	usuarioLogado = false;
 	isAdmin = false;
+	showingUsers = false
+	isEditing = false
 	tokenJWT = '{ "token":"", "isAdmin": false}';
 
 	constructor(private http: HttpClient) {
@@ -29,7 +31,7 @@ export class AppComponent {
 		var novaTarefa = new Tarefa(_descricaoNovaTarefa, false);
 		this.http.post<Tarefa>(`${this.apiURL}/api/post`, novaTarefa, { 'headers': idToken }).subscribe(
 			resultado => { console.log(resultado); this.READ_tarefas(); this.usuarioLogado = true },
-			(error) => { this.usuarioLogado = false });
+			(error) => { this.usuarioLogado = false, this.isAdmin=false });
 	}
 
 	DELETE_tarefa(tarefaAserRemovida: Tarefa){
@@ -38,7 +40,7 @@ export class AppComponent {
  		var id = this.arrayDeTarefas[indice]._id;
  		this.http.delete<Tarefa>(`${this.apiURL}/api/delete/${id}`, { 'headers': idToken }).subscribe(
  		resultado => { console.log(resultado); this.READ_tarefas(); this.usuarioLogado = true },
-		 (error) => { this.usuarioLogado = false });
+		 (error) => { this.usuarioLogado = false, this.isAdmin=false });
 
 	}
 
@@ -46,7 +48,7 @@ export class AppComponent {
 		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
 		this.http.get<Tarefa[]>(`${this.apiURL}/api/getAll`, { 'headers': idToken }).subscribe(
 		(resultado) => { this.arrayDeTarefas = resultado; this.usuarioLogado = true; if (this.isAdmin) this.READ_USERS },
-		(error) => { this.usuarioLogado = false }
+		(error) => { this.usuarioLogado = false, this.isAdmin=false }
 		)
 	   }
 	   
@@ -58,7 +60,7 @@ export class AppComponent {
 		this.http.patch<Tarefa>(`${this.apiURL}/api/update/${id}`,
 		tarefaAserModificada, { 'headers': idToken }).subscribe(
 		resultado => { console.log(resultado); this.READ_tarefas();  this.usuarioLogado = true },
-		(error) => { this.usuarioLogado = false });
+		(error) => { this.usuarioLogado = false, this.isAdmin=false });
 	}
 
 	login(username: string, password: string) {
@@ -76,9 +78,43 @@ export class AppComponent {
 	READ_USERS(){
 		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
 		this.http.get<User[]>(`${this.apiURL}/api/getAllUsers`, { 'headers': idToken}).subscribe(
-		(resultado) => { this.arrayDeUsers=resultado; this.usuarioLogado = true },
-		(error) => { this.usuarioLogado = false }
+		(resultado) => { this.arrayDeUsers=resultado; this.showingUsers=true; this.usuarioLogado = true },
+		(error) => { this.usuarioLogado = false, this.isAdmin=false }
 		)
+	}
+
+	DELETE_USER(userToRemove: User){
+		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
+		var indice = this.arrayDeUsers.indexOf(userToRemove);
+ 		var id = this.arrayDeUsers[indice]._id;
+		if (!this.arrayDeUsers[indice].isAdmin)
+ 		this.http.delete<User>(`${this.apiURL}/api/deleteUser/${id}`, { 'headers': idToken }).subscribe(
+ 		resultado => { console.log(resultado); this.READ_USERS(); this.usuarioLogado = true },
+		 (error) => { this.usuarioLogado = false, this.isAdmin=false });
+
+	}
+
+	CREATE_USER(username: string, password: string) {
+		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
+		var novaTarefa = new User(username, password, false);
+		this.http.post<User>(`${this.apiURL}/api/postUser`, novaTarefa, { 'headers': idToken }).subscribe(
+			resultado => { console.log(resultado); this.READ_USERS(); this.usuarioLogado = true },
+			(error) => { this.usuarioLogado = false, this.isAdmin=false });
+	}
+
+	UPDATE_USER(userToChange: User) {
+		const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
+		var indice = this.arrayDeUsers.indexOf(userToChange);
+		var id = this.arrayDeUsers[indice]._id;
+		this.http.patch<User>(`${this.apiURL}/api/updateUser/${id}`,
+		userToChange, { 'headers': idToken }).subscribe(
+		resultado => { console.log(resultado); this.READ_USERS();  this.usuarioLogado = true },
+		(error) => { this.usuarioLogado = false, this.isAdmin=false });
+	}
+
+	HIDE_USERS(){
+		this.arrayDeUsers = [];
+		this.showingUsers = false
 	}
 	   
 	   
